@@ -9,7 +9,8 @@ from rest_framework import status
 from consumer.models import Fitting
 from .models import GettingStartedInfo
 from .serializers import GettingStartedInfoSerializer
-from consumer.serializers import FittingSerializer
+from consumer.serializers import UserSerializer
+from .serializers import FittingSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -70,10 +71,7 @@ class AdminFittingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return self.queryset.all()
-        
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.all()
     
 class GettingStartedInfoDetailView(generics.RetrieveUpdateAPIView):
     queryset = GettingStartedInfo.objects.all()

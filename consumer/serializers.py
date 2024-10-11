@@ -10,14 +10,53 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id','username','user','email','address', 'phone', 'golf_club_size']
 
-class FittingSerializer(serializers.ModelSerializer):
+
+class UserSerializer2(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+    
     class Meta:
-        model = Fitting
-        fields = ['id','user','date', 'time', 'comments', 'status']
+        model = User
+        fields = [ 'username', 'address', 'phone', 'email', 'profile']
+        
+    def update(self, instance, validated_data):
+        # Update user email
+        email = validated_data.pop('email', None)
+        if email is not None:
+            instance.email = email
+        
+        # Update profile data
+        profile_data = validated_data.pop('profile', {})
+        profile_serializer = ProfileSerializer(instance.profile, data=profile_data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+        
+        instance.save()
 
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     
     class Meta:
         model = User
-        fields = ['name', 'username', 'email', 'profile']
+        fields = ('username', 'email','profile')
+        
+    def update(self, instance, validated_data):
+        email = validated_data.pop('email', None)
+        if email is not None:
+            instance.email = email
+        
+        profile_data = validated_data.pop('profile', {})
+        profile_serializer = ProfileSerializer(instance.profile, data=profile_data)
+
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+        
+        instance.save()
+        return instance
+
+class FittingSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Fitting
+        fields = ['id','user','date', 'time', 'comments', 'status']
+        # fields= "__all__"

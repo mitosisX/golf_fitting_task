@@ -1,4 +1,4 @@
-from rest_framework import viewsets,status,serializers
+from rest_framework import viewsets,status,serializers,generics
 from rest_framework.permissions import IsAuthenticated
 from .models import Fitting, Profile
 from .serializers import FittingSerializer, ProfileSerializer,UserSerializer
@@ -56,3 +56,13 @@ class ProfileUpdateSet(APIView):
             return Response({'message':'Profile Updated', 'status':status.HTTP_201_CREATED})
         
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Retrieve the user by ID from the URL
+        user_id = self.kwargs['pk']
+        return User.objects.get(pk=user_id)
